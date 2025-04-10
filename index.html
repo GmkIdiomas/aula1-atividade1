@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiz de Verbos - GMK Idiomas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #f4f4f4;
+    }
+
+    .quiz-container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 400px;
+      display: block;
+    }
+
+    .header-box {
+      background-color: #4CAF50;
+      color: white;
+      padding: 16px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .question {
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .question p {
+      font-size: 40px;
+      margin: 0;
+    }
+
+    .options {
+      list-style-type: none;
+      padding: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .options li {
+      margin: 0;
+    }
+
+    .option {
+      cursor: pointer;
+      padding: 14px;
+      font-size: 20px;
+      background-color: #f4f4f4;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+      text-align: center;
+    }
+
+    .option:hover {
+      background-color: #ddd;
+    }
+
+    .correct {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .incorrect {
+      background-color: #f44336;
+      color: white;
+    }
+
+    #error-message {
+      text-align: center;
+      color: red;
+      font-size: 18px;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 500px) {
+      .quiz-container {
+        width: 90%;
+      }
+
+      .options {
+        grid-template-columns: 1fr;
+      }
+
+      .option {
+        font-size: 18px;
+      }
+
+      .question p {
+        font-size: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container" id="quiz-container">
+    <div class="header-box">GMK Idiomas</div>
+
+    <div class="question" id="question">
+      <p></p>
+    </div>
+    <ul class="options" id="options"></ul>
+    <div id="error-message"></div>
+  </div>
+
+  <script>
+    const questions = [
+      { question: "Abraçando", correctAnswer: "hugging" },
+      { question: "Abrindo", correctAnswer: "opening" },
+      { question: "Acariciando", correctAnswer: "caressing" },
+      { question: "Aceitando", correctAnswer: "accepting" },
+      { question: "Acordando", correctAnswer: "waking up" },
+      { question: "Adicionando", correctAnswer: "adding" },
+      { question: "Atacando", correctAnswer: "attacking" },
+      { question: "Esperando", correctAnswer: "waiting" },
+      { question: "Consertando", correctAnswer: "fixing" },
+      { question: "Ajudando", correctAnswer: "helping" }
+    ];
+
+    const allAnswers = [
+      "hugging", "opening", "caressing", "accepting", "waking up",
+      "adding", "attacking", "waiting", "fixing", "helping"
+    ];
+
+    let currentQuestionIndex = 0;
+    let correctAnswers = [];
+    let errorCount = 0;
+
+    function shuffleQuestions() {
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [questions[i], questions[j]] = [questions[j], questions[i]];
+      }
+    }
+
+    function createOptions() {
+      const optionsContainer = document.getElementById('options');
+      allAnswers.forEach(answer => {
+        const optionElement = document.createElement('li');
+        optionElement.classList.add('option');
+        optionElement.textContent = answer;
+
+        if (correctAnswers.includes(answer)) {
+          optionElement.classList.add('correct');
+        }
+
+        optionElement.onclick = function () {
+          checkAnswer(answer, optionElement);
+        };
+        optionsContainer.appendChild(optionElement);
+      });
+    }
+
+    function showQuestion() {
+      const questionData = questions[currentQuestionIndex];
+      const questionElement = document.getElementById('question').querySelector('p');
+      questionElement.textContent = questionData.question;
+    }
+
+    function checkAnswer(selectedAnswer, clickedElement) {
+      const options = clickedElement.parentElement.querySelectorAll('.option');
+      const errorMessageElement = document.getElementById('error-message');
+
+      if (selectedAnswer === questions[currentQuestionIndex].correctAnswer) {
+        clickedElement.classList.add('correct');
+        correctAnswers.push(selectedAnswer);
+        errorMessageElement.textContent = '';
+        setTimeout(() => {
+          if (currentQuestionIndex < questions.length - 1) {
+            currentQuestionIndex++;
+            showQuestion();
+            resetOptions();
+          } else {
+            showFinalMessage();
+          }
+        }, 1000);
+      } else {
+        clickedElement.classList.add('incorrect');
+        errorCount++;
+        errorMessageElement.textContent = 'Resposta Errada! Tente novamente.';
+        options.forEach(option => option.style.pointerEvents = 'none');
+        setTimeout(() => {
+          resetOptions();
+          errorMessageElement.textContent = '';
+          options.forEach(option => option.style.pointerEvents = 'auto');
+        }, 2000);
+      }
+    }
+
+    function resetOptions() {
+      const optionsContainer = document.getElementById('options');
+      optionsContainer.innerHTML = '';
+      createOptions();
+    }
+
+    function showFinalMessage() {
+      const container = document.getElementById('quiz-container');
+      container.innerHTML = `
+        <div class="header-box">GMK Idiomas</div>
+        <h2 style="text-align: center;">Você completou o quiz!</h2>
+        <p style="text-align: center; font-size: 20px;">Total de erros: <strong>${errorCount}</strong></p>
+      `;
+    }
+
+    function initQuiz() {
+      shuffleQuestions();
+      createOptions();
+      showQuestion();
+    }
+
+    initQuiz();
+  </script>
+</body>
+</html>
